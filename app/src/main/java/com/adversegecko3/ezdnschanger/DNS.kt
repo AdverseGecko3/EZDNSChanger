@@ -1,6 +1,6 @@
 package com.adversegecko3.ezdnschanger
 
 data class DNS(
-    val name: String,
-    val value: String
+    val name: String? = null,
+    val value: String? = null
 )

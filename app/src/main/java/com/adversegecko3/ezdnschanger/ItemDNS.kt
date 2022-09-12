@@ -21,14 +21,18 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 
 @ExperimentalMaterialApi
 @Composable
 fun ItemDNS(
     dns: DNS,
-    pos: Int
+    pos: Int,
+    viewModel: DNSViewModel
 ) {
     val context = LocalContext.current
+    val dialogState = remember { mutableStateOf(false) }
+    val dialogType = remember { mutableStateOf(0) }
     var showMenu by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
@@ -48,7 +52,7 @@ fun ItemDNS(
                 val intent = Intent(Settings.ACTION_WIRELESS_SETTINGS)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
-                Toast.makeText(context, "Copied $dns", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "Copied ${dns.value}", Toast.LENGTH_SHORT).show()
             }
         ) {
             Row(
@@ -56,26 +60,39 @@ fun ItemDNS(
                 modifier = Modifier
                     .padding(horizontal = 16.dp, vertical = 8.dp)
             ) {
-                Column {
+                Column(
+                    modifier = Modifier
+                        .width(IntrinsicSize.Max)
+                        .height(IntrinsicSize.Max)
+                ) {
                     Text(
-                        text = dns.name,
+                        text = dns.name!!,
                         color = MaterialTheme.colors.onSurface,
                         fontSize = 20.sp
                     )
                     Text(
-                        text = dns.value,
+                        text = dns.value!!,
                         color = Color.Gray
                     )
                 }
                 Spacer(modifier = Modifier.weight(1f))
 
                 // TODO("Drop down menu to edit and delete")
-                Box {
-                    IconButton(onClick = { showMenu = !showMenu }) {
+                Box(
+                    modifier = Modifier
+                        .width(IntrinsicSize.Max)
+                        .height(IntrinsicSize.Max)
+                ) {
+                    IconButton(
+                        onClick = { showMenu = !showMenu },
+                        Modifier.fillMaxSize()
+                    ) {
                         Icon(
                             imageVector = Icons.Filled.MoreVert,
                             contentDescription = "Options menu icon",
-                            modifier = Modifier.height(IntrinsicSize.Max)
+                            modifier = Modifier
+                                .height(IntrinsicSize.Max)
+                                .width(IntrinsicSize.Max)
                         )
                     }
                     DropdownMenu(
@@ -83,7 +100,9 @@ fun ItemDNS(
                         onDismissRequest = { showMenu = false }
                     ) {
                         DropdownMenuItem(onClick = {
-                            editItem(pos, DNS("jajaja", "jajaja"))
+                            showMenu = !showMenu
+                            dialogType.value = 0
+                            dialogState.value = true
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Edit,
@@ -93,7 +112,9 @@ fun ItemDNS(
                             Text(text = "Edit")
                         }
                         DropdownMenuItem(onClick = {
-
+                            showMenu = !showMenu
+                            dialogType.value = 1
+                            dialogState.value = true
                         }) {
                             Icon(
                                 imageVector = Icons.Filled.Delete,
@@ -108,11 +129,28 @@ fun ItemDNS(
             }
         }
     }
+    if (dialogState.value) {
+        if (dialogType.value == 0) {
+            DialogAddEditDNS(
+                dns = dns,
+                pos = pos,
+                dialogState = dialogState,
+                viewModel = viewModel,
+                onDismissRequest = { dialogState.value = false })
+        } else {
+            DialogDeleteDNS(
+                dns = dns,
+                dialogState = dialogState,
+                viewModel = viewModel,
+                onDismissRequest = { dialogState.value = false })
+        }
+    }
 }
 
 @ExperimentalMaterialApi
 @Preview(showBackground = true)
 @Composable
 fun PreviewItemDNS() {
-    ItemDNS(dns = DNS("Cloudflare", "1.1.1.1"), 0)
+    val viewModel: DNSViewModel = viewModel()
+    ItemDNS(dns = DNS("Cloudflare", "1.1.1.1"), 0, viewModel)
 }
