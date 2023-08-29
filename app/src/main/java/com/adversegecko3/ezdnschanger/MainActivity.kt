@@ -30,35 +30,3 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
-
-/*
-@ExperimentalMaterialApi
-@Composable
-fun Options() {
-    val context = LocalContext.current
-    val canWrite = remember { mutableStateOf(false) }
-
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(
-        key1 = lifecycleOwner,
-        effect = {
-            val observer = LifecycleEventObserver { _, event ->
-                if (event == Lifecycle.Event.ON_RESUME) {
-                    canWrite.value = Settings.System.canWrite(context)
-                }
-            }
-            lifecycleOwner.lifecycle.addObserver(observer)
-
-            onDispose {
-                lifecycleOwner.lifecycle.removeObserver(observer)
-            }
-        }
-    )
-
-    if (canWrite.value) {
-        WriteGranted()
-    } else {
-        WriteNotGranted()
-    }
-}
-*/

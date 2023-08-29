@@ -6,14 +6,34 @@ import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import android.widget.Toast
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.*
+import androidx.compose.material.Card
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,7 +52,7 @@ fun ItemDNS(
 ) {
     val context = LocalContext.current
     val dialogState = remember { mutableStateOf(false) }
-    val dialogType = remember { mutableStateOf(0) }
+    val dialogType = remember { mutableIntStateOf(0) }
     var showMenu by remember { mutableStateOf(false) }
     Box(
         modifier = Modifier
@@ -49,9 +69,11 @@ fun ItemDNS(
                     context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val clip = ClipData.newPlainText("DNS Server", dns.value)
                 clipboard.setPrimaryClip(clip)
+
                 val intent = Intent(Settings.ACTION_WIRELESS_SETTINGS)
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                 context.startActivity(intent)
+
                 Toast.makeText(context, "Copied ${dns.value}", Toast.LENGTH_SHORT).show()
             }
         ) {
@@ -77,22 +99,14 @@ fun ItemDNS(
                 }
                 Spacer(modifier = Modifier.weight(1f))
 
-                // TODO("Drop down menu to edit and delete")
-                Box(
-                    modifier = Modifier
-                        .width(IntrinsicSize.Max)
-                        .height(IntrinsicSize.Max)
-                ) {
+                Box {
                     IconButton(
-                        onClick = { showMenu = !showMenu },
-                        Modifier.fillMaxSize()
+                        onClick = { showMenu = !showMenu }
                     ) {
                         Icon(
                             imageVector = Icons.Filled.MoreVert,
                             contentDescription = "Options menu icon",
-                            modifier = Modifier
-                                .height(IntrinsicSize.Max)
-                                .width(IntrinsicSize.Max)
+                            modifier = Modifier.align(Alignment.CenterEnd)
                         )
                     }
                     DropdownMenu(
@@ -101,7 +115,7 @@ fun ItemDNS(
                     ) {
                         DropdownMenuItem(onClick = {
                             showMenu = !showMenu
-                            dialogType.value = 0
+                            dialogType.intValue = 0
                             dialogState.value = true
                         }) {
                             Icon(
@@ -113,7 +127,7 @@ fun ItemDNS(
                         }
                         DropdownMenuItem(onClick = {
                             showMenu = !showMenu
-                            dialogType.value = 1
+                            dialogType.intValue = 1
                             dialogState.value = true
                         }) {
                             Icon(
@@ -130,7 +144,7 @@ fun ItemDNS(
         }
     }
     if (dialogState.value) {
-        if (dialogType.value == 0) {
+        if (dialogType.intValue == 0) {
             DialogAddEditDNS(
                 dns = dns,
                 pos = pos,
